@@ -7,13 +7,14 @@
 
 <h3>Delete your profile</h3>
 
-<form method = "post">
-    <p>Are you sure you really want to delete your profile?</p>
-    <button type="submit">Yes, delete</button> or <a href="/">No, take me back<a>
-</form>
+{% if user.inactive == False %}
+    <form method = "post">
+        <p>Are you sure you really want to delete your profile?</p>
+        <button type="submit">Yes, delete</button> or <a href="/">No, take me back<a>
+    </form>
+{% else %}
+    <h3> {{ message3 }}</h3>
+{% endif %}
 
-{% if message3 %}
-        <h3> {{ message3 }}</h3>
-{& endif $}
 
 {% endblock %}

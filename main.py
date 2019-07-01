@@ -137,6 +137,8 @@ def edit_profile():
             hashed_new_password = hashlib.sha256(new_password.encode()).hexdigest()
             if hashed_new_password != user.password:
                 user.password = hashed_new_password
+                message = "Your passwrod had been updated succesfully"
+                return render_template("edit_profile.html", message=message, user=user)
             else:
                 message1 = "This password is the same than the old one, please set a different one"
                 return render_template("edit_profile.html", message1=message1, user=user)
@@ -166,7 +168,7 @@ def delete():
             user.inactive = True
             db.add(user)
             db.commit()
-            resp = make_response(render_template("index.html", user=user, message3=message3))
+            resp = make_response(render_template("edit_profile.html", user=user, message3=message3))
             resp.set_cookie('session_token', expires=0)
             return response
         else:
