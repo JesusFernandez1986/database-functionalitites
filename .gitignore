@@ -1,3 +1,7 @@
 localhost.sqlite
 venv/
+<<<<<<< HEAD
 idea
+=======
+idea/
+>>>>>>> 000394e8a3d32e23596402efa6ec21e32f05783d
