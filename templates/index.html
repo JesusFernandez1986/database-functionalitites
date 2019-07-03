@@ -23,14 +23,19 @@
                     </form>
                 {% else %}                                  <!---si no lo mandamos a la ruta de login para que se registre--->
                     {% if message %}
-                        <h4> {{ message }}</h4>
+                        <h5> {{ message }}</h5>
                     {% endif %}
                     <form method="post" action="/login">
                         <input type="text" name="user-name" placeholder="Enter your name"><br>
                         <input type="email" name="user-email" placeholder="Enter your email address">
                         <input type="password" name="user-password" placeholder="Enter your password"><br>
                         <br>
-                        <button type="submit" class="btn btn-secondary btn-lg">Enviar</button>
+
+                        <div class="row justify-content-center">
+                            <div class="col-8">
+                                <button type="submit" class="btn btn-secondary btn-lg">Enviar</button>
+                            </div>
+                        </div>
                     </form>
                 {% endif %}
             </div>

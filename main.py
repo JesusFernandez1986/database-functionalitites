@@ -59,7 +59,7 @@ def index():
             user = None
 
         data.update({'user': user})
-        message = request.args.get("message", False)
+        message = request.args.get("message", False)                            #cogemos el mensaje enviado por /profile y /user_list
         return render_template("index.html", data=data, message=message)
 
     elif request.method == "POST":
@@ -142,7 +142,7 @@ def edit_profile():
             hashed_new_password = hashlib.sha256(new_password.encode()).hexdigest()
             if hashed_new_password != user.password:
                 user.password = hashed_new_password
-                message3 = "Your password had been updated succesfully"
+                message = "Your password had been updated succesfully"
             else:
                 message1 = "This password is the same than the old one, please set a different one"
                 return render_template("edit_profile.html", message1=message1, user=user)
@@ -150,12 +150,12 @@ def edit_profile():
             message2 = "Your password must be at least 6 characters long"
             return render_template("edit_profile.html", message2=message2, user=user)
 
-        user.name = name    #asignamos el valor de la variable name y email a la propiedad user.name y user.email del objeto
+        user.name = name            #asignamos el valor de la variable name y email a la propiedad user.name y user.email del objeto
         user.email = email
         db.add(user)                #guardamos los cambios en la base de datos
         db.commit()
 
-        return render_template("profile.html",message3=message3, user=user)
+        return render_template("profile.html", message=message, user=user)
 
 
 
@@ -166,14 +166,18 @@ def delete():
 
     if request.method == "GET":
         return render_template("delete.html", user=user)
+
     elif request.method == "POST":
-        message3 = "Your profile has been deleted succesfully"
-        user.inactive = True
-        db.add(user)
-        db.commit()
-        resp = make_response(render_template("profile.html", user=user, message3=message3))
-        resp.set_cookie('session_token', expires=0)
-        return resp
+        if not user.inactive:
+            message3 = "Your profile has been deleted succesfully"
+            user.inactive = True
+            db.add(user)
+            db.commit()
+            resp = make_response(render_template("profile.html", user=user, message3=message3))
+            resp.set_cookie('session_token', expires=0)
+            return resp
+        else:
+            redirect(url_for("profile"))
 
 
 
@@ -197,7 +201,3 @@ def user_details(user_id):
 
 if __name__ == '__main__':
     app.run(debug=True)
-
-
-
-
