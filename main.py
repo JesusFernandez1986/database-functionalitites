@@ -10,21 +10,13 @@ db.create_all()
 wrong_guess = []
 
 
-def usuario():
-    session_token = request.cookies.get("session_token")
-    user = db.query(User).filter_by(session_token=session_token, inactive=False).first()
-    return (user)
-
-
 @app.route("/login", methods=["POST"])
 def login():
     name = request.form.get("user-name")        #cogemos del formulario el nombre y el email y los guardamos en las variables name y email
     email = request.form.get("user-email")
     secret_number = random.randint(1, 30)       #generamos un numero aleatorio y lo guardamos en secret_number
     password = request.form.get("user-password")
-
     hashed_password = hashlib.sha256(password.encode()).hexdigest()     #encriptamos el password
-
 
     user = db.query(User).filter_by(email=email).first()    #comprobamos si ese usuario existe en nuestra base de datos, filtrando por el email
 
@@ -45,6 +37,16 @@ def login():
     response.set_cookie("session_token", session_token, httponly=True, samesite='Strict')       #guardamos el token de sesions en una cookie llamada session_token
     return response
 
+
+
+@app.route("/logout")
+def logout():
+    response = make_response(redirect(url_for('index')))
+    response.set_cookie("session_token", expires=0)
+    return response
+
+
+
 @app.route('/', methods=["GET", "POST"])
 def index():
     if request.method == "GET":
@@ -57,8 +59,8 @@ def index():
             user = None
 
         data.update({'user': user})
-        return render_template("index.html", data=data)
-
+        message = request.args.get("message", False)
+        return render_template("index.html", data=data, message=message)
 
     elif request.method == "POST":
         guess = request.form.get('guess', False)
@@ -108,10 +110,13 @@ def index():
     return render_template("index.html")
 
 
-
 @app.route("/profile")
 def profile():
-    session_token = request.cookies.get("session_token")
+    session_token = request.cookies.get("session_token", False)
+    if not session_token:
+        message = "You need to be logged in to access"
+        return redirect(url_for("index", message=message))
+
     user = db.query(User).filter_by(session_token=session_token).first()
 
     if user:
@@ -133,12 +138,11 @@ def edit_profile():
         email = request.form.get("profile-email")
         new_password = request.form.get("new_password")
 
-        if len(new_password) > 6:
+        if len(new_password) >= 6:
             hashed_new_password = hashlib.sha256(new_password.encode()).hexdigest()
             if hashed_new_password != user.password:
                 user.password = hashed_new_password
-                message = "Your passwrod had been updated succesfully"
-                return render_template("edit_profile.html", message=message, user=user)
+                message3 = "Your password had been updated succesfully"
             else:
                 message1 = "This password is the same than the old one, please set a different one"
                 return render_template("edit_profile.html", message1=message1, user=user)
@@ -151,7 +155,7 @@ def edit_profile():
         db.add(user)                #guardamos los cambios en la base de datos
         db.commit()
 
-        return redirect(url_for("edit_profile"))
+        return render_template("profile.html",message3=message3, user=user)
 
 
 
@@ -163,31 +167,33 @@ def delete():
     if request.method == "GET":
         return render_template("delete.html", user=user)
     elif request.method == "POST":
-        if not user.inactive:
-            message3 = "Your profile has been deleted succesfully"
-            user.inactive = True
-            db.add(user)
-            db.commit()
-            resp = make_response(render_template("edit_profile.html", user=user, message3=message3))
-            resp.set_cookie('session_token', expires=0)
-            return response
-        else:
-            redirect (url_for("profile"))
+        message3 = "Your profile has been deleted succesfully"
+        user.inactive = True
+        db.add(user)
+        db.commit()
+        resp = make_response(render_template("profile.html", user=user, message3=message3))
+        resp.set_cookie('session_token', expires=0)
+        return resp
 
 
 
 @app.route("/users_list", methods=["GET"])
 def users_list():
-    session_token = request.cookies.get("session_token")
-    user = db.query(User).filter_by(session_token=session_token).first()
-    users = db.query(User).all()
-    return render_template("users.html", user=user, users=users)
+    users = db.query(User).filter_by(inactive=False).all()
+    session_token = request.cookies.get("session_token", False)
+    if not session_token:
+        message = "You need to be logged in to access"
+        return redirect(url_for("index", message=message))
+    return render_template("users.html", users=users)
+
 
 
 @app.route("/user/<user_id>", methods=["GET"])
 def user_details(user_id):
     user = db.query(User).get(int(user_id))
     return render_template("user_details.html", user=user)
+
+
 
 if __name__ == '__main__':
     app.run(debug=True)

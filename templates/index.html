@@ -22,6 +22,9 @@
                         <button type="submit" class="btn btn-secondary btn-lg">Enviar</button>
                     </form>
                 {% else %}                                  <!---si no lo mandamos a la ruta de login para que se registre--->
+                    {% if message %}
+                        <h4> {{ message }}</h4>
+                    {% endif %}
                     <form method="post" action="/login">
                         <input type="text" name="user-name" placeholder="Enter your name"><br>
                         <input type="email" name="user-email" placeholder="Enter your email address">

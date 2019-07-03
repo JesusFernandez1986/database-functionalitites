@@ -5,6 +5,10 @@
 {% block content %}
 <h3>Your profile</h3>
 
+{% if message3 %}
+    <h3> {{ message3 }}</h3>
+{% endif %}
+
 <p>Your name: {{ user.name }}</p>
 <p>Your email: {{ user.email }} </p>
 
