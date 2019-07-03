@@ -1,1 +1,1 @@
-ejercicio para demostrar como codificar un password 
+ejercicio para trabajar con los test automatizados usando la libreria pytest
